@@ -5,6 +5,7 @@ import {
   updateListing,
   getListing,
   getListings,
+  getUserListings, // 🔥 ADD THIS
 } from "../controllers/listing.controller.js";
 
 import { verifyToken } from "../utils/verifyUser.js";
@@ -35,7 +36,6 @@ router.post("/upload", upload.single("image"), (req, res) => {
           return res.status(500).json({
             success: false,
             message: "Cloudinary upload failed",
-            error: error.message,
           });
         }
 
@@ -46,11 +46,9 @@ router.post("/upload", upload.single("image"), (req, res) => {
       }
     ).end(req.file.buffer);
   } catch (err) {
-    console.error("UPLOAD CRASH:", err);
     return res.status(500).json({
       success: false,
       message: "Upload crashed",
-      error: err.message,
     });
   }
 });
@@ -62,5 +60,8 @@ router.delete("/delete/:id", verifyToken, deleteListing);
 router.post("/update/:id", verifyToken, updateListing);
 router.get("/get/:id", getListing);
 router.get("/get", getListings);
+
+// 🔥🔥🔥 THIS LINE FIXES YOUR 3-DAY BUG
+router.get("/user/:id", verifyToken, getUserListings);
 
 export default router;

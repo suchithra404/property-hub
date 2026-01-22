@@ -2,6 +2,12 @@ import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+// COOKIE OPTIONS (REUSABLE)
+const cookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax', // ✅ REQUIRED for localhost
+};
+
 // SIGN UP
 export const signup = async (req, res, next) => {
   try {
@@ -17,7 +23,7 @@ export const signup = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
-      avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png", // ✅ default avatar
+      avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
     });
 
     await newUser.save();
@@ -25,8 +31,9 @@ export const signup = async (req, res, next) => {
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
 
     const { password: pass, ...rest } = newUser._doc;
+
     res
-      .cookie('access_token', token, { httpOnly: true })
+      .cookie('access_token', token, cookieOptions)
       .status(201)
       .json(rest);
   } catch (err) {
@@ -49,8 +56,9 @@ export const signin = async (req, res, next) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     const { password: pass, ...rest } = user._doc;
+
     res
-      .cookie('access_token', token, { httpOnly: true })
+      .cookie('access_token', token, cookieOptions)
       .status(200)
       .json(rest);
   } catch (err) {
@@ -68,8 +76,9 @@ export const google = async (req, res, next) => {
     if (user) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = user._doc;
+
       res
-        .cookie('access_token', token, { httpOnly: true })
+        .cookie('access_token', token, cookieOptions)
         .status(200)
         .json(rest);
     } else {
@@ -80,18 +89,21 @@ export const google = async (req, res, next) => {
       const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
 
       const newUser = new User({
-        username: name.split(' ').join('').toLowerCase(), // ✅ clean username
+        username: name.split(' ').join('').toLowerCase(),
         email,
         password: hashedPassword,
-        avatar: photo || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+        avatar:
+          photo ||
+          'https://cdn-icons-png.flaticon.com/512/149/149071.png',
       });
 
       await newUser.save();
 
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
       const { password: pass, ...rest } = newUser._doc;
+
       res
-        .cookie('access_token', token, { httpOnly: true })
+        .cookie('access_token', token, cookieOptions)
         .status(201)
         .json(rest);
     }
