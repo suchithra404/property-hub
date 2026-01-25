@@ -1,14 +1,24 @@
 import express from 'express';
-import { signup, signin } from '../controllers/auth.controller.js';
+
+import {
+  signup,
+  signin,
+  google,
+  signOut,
+} from '../controllers/auth.controller.js';
 
 const router = express.Router();
 
+// Sign Up
 router.post('/signup', signup);
+
+// Sign In
 router.post('/signin', signin);
 
-router.post('/google', async (req, res) => {
-  const { name, email, photo } = req.body;
-  res.status(200).json({ name, email, photo });
-});
+// Google Auth
+router.post('/google', google);
+
+// Logout
+router.post('/logout', signOut);
 
 export default router;

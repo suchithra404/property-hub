@@ -3,21 +3,16 @@ dotenv.config();
 
 import express from "express";
 import mongoose from "mongoose";
-import listingRoutes from "./routes/listing.route.js";
-// other imports
-
-
-
 
 import cookieParser from "cookie-parser";
 import path from "path";
 import cors from "cors";
 
+// Routes
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
-
-
+import adminRouter from "./routes/admin.route.js"; // ✅ ADD THIS
 
 const app = express();
 const __dirname = path.resolve();
@@ -50,6 +45,7 @@ mongoose
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
+app.use("/api/admin", adminRouter); // ✅ ADD THIS
 
 /* ========== FRONTEND ========== */
 
@@ -64,6 +60,7 @@ app.get("/:catchAll(.*)", (req, res) => {
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
+
   res.status(statusCode).json({
     success: false,
     statusCode,
@@ -74,4 +71,7 @@ app.use((err, req, res, next) => {
 /* ========== START SERVER ========== */
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

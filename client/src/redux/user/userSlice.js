@@ -9,7 +9,12 @@ const initialState = {
 const userSlice = createSlice({
   name: 'user',
   initialState,
+
   reducers: {
+
+    // =====================
+    // SIGN IN
+    // =====================
     signInStart: (state) => {
       state.loading = true;
     },
@@ -17,8 +22,14 @@ const userSlice = createSlice({
     signInSuccess: (state, action) => {
       state.currentUser = {
         ...action.payload,
+
+        // Ensure id exists
         id: action.payload._id || action.payload.id,
+
+        // 🔥 Save role properly
+        role: action.payload.role || 'user',
       };
+
       state.loading = false;
       state.error = null;
     },
@@ -28,6 +39,9 @@ const userSlice = createSlice({
       state.loading = false;
     },
 
+    // =====================
+    // UPDATE USER
+    // =====================
     updateUserStart: (state) => {
       state.loading = true;
     },
@@ -35,8 +49,16 @@ const userSlice = createSlice({
     updateUserSuccess: (state, action) => {
       state.currentUser = {
         ...action.payload,
+
         id: action.payload._id || action.payload.id,
+
+        // 🔥 Keep old role if new one not sent
+        role:
+          action.payload.role ||
+          (state.currentUser && state.currentUser.role) ||
+          'user',
       };
+
       state.loading = false;
       state.error = null;
     },
@@ -46,6 +68,9 @@ const userSlice = createSlice({
       state.loading = false;
     },
 
+    // =====================
+    // DELETE USER
+    // =====================
     deleteUserStart: (state) => {
       state.loading = true;
     },
@@ -61,6 +86,9 @@ const userSlice = createSlice({
       state.loading = false;
     },
 
+    // =====================
+    // SIGN OUT
+    // =====================
     signOutUserStart: (state) => {
       state.loading = true;
     },
