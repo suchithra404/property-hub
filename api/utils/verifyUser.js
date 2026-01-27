@@ -3,7 +3,10 @@ import { errorHandler } from './error.js';
 
 export const verifyToken = (req, res, next) => {
 
-  const token = req.cookies.access_token;
+  // ✅ Read from cookie OR header
+  const token =
+    req.cookies?.access_token ||
+    req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return next(errorHandler(401, 'Unauthorized'));
@@ -15,9 +18,10 @@ export const verifyToken = (req, res, next) => {
       return next(errorHandler(403, 'Forbidden'));
     }
 
-    // ✅ Attach FULL user info (IMPORTANT)
+    // ✅ Attach FULL user info
     req.user = {
       _id: decoded._id || decoded.id,
+      id: decoded._id || decoded.id,
       role: decoded.role,
       email: decoded.email,
       username: decoded.username,

@@ -31,6 +31,24 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin", "superadmin"],
       default: "user",
     },
+
+    // ✅ Buyer / Seller / Both
+    accountType: {
+      type: String,
+      enum: ["buyer", "seller", "both"],
+      default: "buyer",
+    },
+    // ❤️ Wishlist
+// ❤️ Wishlist
+wishlist: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Listing",
+  },
+],
+
+
+
   },
 
   { timestamps: true }

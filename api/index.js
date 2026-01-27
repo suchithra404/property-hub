@@ -12,7 +12,9 @@ import cors from "cors";
 import userRouter from "./routes/user.route.js";
 import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
-import adminRouter from "./routes/admin.route.js"; // ✅ ADD THIS
+import adminRouter from "./routes/admin.route.js"; 
+import wishlistRoute from "./routes/wishlist.route.js";
+
 
 const app = express();
 const __dirname = path.resolve();
@@ -45,15 +47,23 @@ mongoose
 app.use("/api/user", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
-app.use("/api/admin", adminRouter); // ✅ ADD THIS
+app.use("/api/admin", adminRouter); 
+app.use("/api/wishlist", wishlistRoute);
+
 
 /* ========== FRONTEND ========== */
 
 app.use(express.static(path.join(__dirname, "/client/dist")));
 
-app.get("/:catchAll(.*)", (req, res) => {
+// Serve frontend only for non-API routes
+app.get("*", (req, res) => {
+  if (req.originalUrl.startsWith("/api")) {
+    return res.status(404).json({ message: "API route not found" });
+  }
+
   res.sendFile(path.join(__dirname, "/client/dist", "index.html"));
 });
+
 
 /* ========== ERROR HANDLER ========== */
 

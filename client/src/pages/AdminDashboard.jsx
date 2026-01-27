@@ -9,6 +9,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // ✅ Filter State
+  const [filterType, setFilterType] = useState("all");
+
   // =========================
   // Fetch all users
   // =========================
@@ -39,6 +42,33 @@ export default function AdminDashboard() {
     fetchUsers();
 
   }, []);
+
+  // =========================
+  // Filter Logic
+  // =========================
+  const filteredUsers = users.filter((user) => {
+
+    if (filterType === "all") return true;
+
+    return user.accountType === filterType;
+  });
+
+  // =========================
+  // Stats
+  // =========================
+  const totalUsers = users.length;
+
+  const buyerCount = users.filter(
+    (u) => u.accountType === "buyer"
+  ).length;
+
+  const sellerCount = users.filter(
+    (u) => u.accountType === "seller"
+  ).length;
+
+  const bothCount = users.filter(
+    (u) => u.accountType === "both"
+  ).length;
 
   // =========================
   // Delete User
@@ -123,7 +153,7 @@ export default function AdminDashboard() {
   };
 
   // =========================
-  // Remove Admin (Demote)
+  // Remove Admin
   // =========================
   const handleRemoveAdmin = async (id) => {
 
@@ -179,6 +209,69 @@ export default function AdminDashboard() {
         Welcome, Admin! You can manage users here.
       </p>
 
+      {/* =========================
+          USER STATS
+      ========================= */}
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+
+        <div className="bg-blue-100 p-4 rounded shadow text-center">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Total Users
+          </h3>
+          <p className="text-2xl font-bold text-blue-700">
+            {totalUsers}
+          </p>
+        </div>
+
+        <div className="bg-green-100 p-4 rounded shadow text-center">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Buyers
+          </h3>
+          <p className="text-2xl font-bold text-green-700">
+            {buyerCount}
+          </p>
+        </div>
+
+        <div className="bg-yellow-100 p-4 rounded shadow text-center">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Sellers
+          </h3>
+          <p className="text-2xl font-bold text-yellow-700">
+            {sellerCount}
+          </p>
+        </div>
+
+        <div className="bg-purple-100 p-4 rounded shadow text-center">
+          <h3 className="text-lg font-semibold text-gray-700">
+            Buyer & Seller
+          </h3>
+          <p className="text-2xl font-bold text-purple-700">
+            {bothCount}
+          </p>
+        </div>
+
+      </div>
+
+      {/* ✅ FILTER DROPDOWN */}
+      <div className="mt-6 flex items-center gap-3">
+
+        <label className="font-semibold text-gray-700">
+          Filter by Account Type:
+        </label>
+
+        <select
+          value={filterType}
+          onChange={(e) => setFilterType(e.target.value)}
+          className="border px-3 py-2 rounded-md"
+        >
+          <option value="all">All</option>
+          <option value="buyer">Buyer</option>
+          <option value="seller">Seller</option>
+          <option value="both">Buyer & Seller</option>
+        </select>
+
+      </div>
+
       {/* Loading */}
       {loading && (
         <p className="mt-6 text-blue-600">
@@ -204,12 +297,13 @@ export default function AdminDashboard() {
                 <th className="p-3 border">Name</th>
                 <th className="p-3 border">Email</th>
                 <th className="p-3 border">Role</th>
+                <th className="p-3 border">Account Type</th>
                 <th className="p-3 border">Actions</th>
               </tr>
             </thead>
 
             <tbody>
-              {users.map((user) => (
+              {filteredUsers.map((user) => (
                 <tr
                   key={user._id}
                   className="text-center"
@@ -227,16 +321,18 @@ export default function AdminDashboard() {
                     {user.role}
                   </td>
 
+                  <td className="p-3 border capitalize">
+                    {user.accountType || "buyer"}
+                  </td>
+
                   {/* Actions */}
                   <td className="p-3 border flex gap-2 justify-center">
 
-                    {/* SUPERADMIN */}
                     {currentUser?.role === "superadmin" ? (
 
                       user.role !== "superadmin" ? (
                         <>
 
-                          {/* Make Admin */}
                           {user.role === "user" && (
                             <button
                               onClick={() =>
@@ -248,7 +344,6 @@ export default function AdminDashboard() {
                             </button>
                           )}
 
-                          {/* Remove Admin */}
                           {user.role === "admin" && (
                             <button
                               onClick={() =>
@@ -260,7 +355,6 @@ export default function AdminDashboard() {
                             </button>
                           )}
 
-                          {/* Delete User */}
                           {user.role === "user" && (
                             <button
                               onClick={() =>
@@ -281,7 +375,6 @@ export default function AdminDashboard() {
 
                     ) : (
 
-                      /* NORMAL ADMIN */
                       user.role === "user" ? (
                         <button
                           onClick={() =>

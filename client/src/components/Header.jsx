@@ -1,7 +1,7 @@
 import { FaSearch } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import {
   signOutUserStart,
@@ -16,10 +16,61 @@ export default function Header() {
   // Search state
   const [searchTerm, setSearchTerm] = useState("");
 
+  // ❤️ Wishlist Count
+  const [wishlistCount, setWishlistCount] = useState(0);
+
   // Get user from redux
   const { currentUser } = useSelector((state) => state.user);
 
+  
+// Fetch Wishlist Count
+
+// =====================
+// Fetch Wishlist Count
+// =====================
+useEffect(() => {
+  if (!currentUser) return;
+
+  const fetchWishlist = async () => {
+    try {
+      const res = await fetch("/api/wishlist", {
+        credentials: "include",
+      });
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setWishlistCount(data.length);
+      } else {
+        setWishlistCount(0);
+      }
+
+    } catch (error) {
+      console.log("Fetch Wishlist Error:", error);
+      setWishlistCount(0);
+    }
+  };
+
+  // First load
+  fetchWishlist();
+
+  // ✅ Listen for wishlist updates
+  window.addEventListener("wishlistUpdated", fetchWishlist);
+
+  return () => {
+    window.removeEventListener("wishlistUpdated", fetchWishlist);
+  };
+
+}, [currentUser]);
+
+
+
+
+  // =====================
   // Logout Function
+  // =====================
   const handleLogout = async () => {
     const confirmLogout = window.confirm("Are you sure you want to logout?");
 
@@ -51,7 +102,9 @@ export default function Header() {
     }
   };
 
+  // =====================
   // Search Function
+  // =====================
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
 
@@ -111,7 +164,14 @@ export default function Header() {
                 <Link to="/profile">Profile</Link>
               </li>
 
-              {/* Admin Dashboard (Admin + Superadmin) */}
+              {/* ❤️ Wishlist */}
+              <li className="text-red-500 font-semibold hover:underline">
+                <Link to="/wishlist">
+                  ❤️🏠 Wishlist ({wishlistCount})
+                </Link>
+              </li>
+
+              {/* Admin Dashboard */}
               {(currentUser.role === "admin" ||
                 currentUser.role === "superadmin") && (
                 <li className="text-blue-600 font-semibold hover:underline">
@@ -119,7 +179,7 @@ export default function Header() {
                 </li>
               )}
 
-              {/* ✅ Admin Logs (Admin + Superadmin) */}
+              {/* Admin Logs */}
               {(currentUser.role === "admin" ||
                 currentUser.role === "superadmin") && (
                 <li className="text-purple-600 font-semibold hover:underline">

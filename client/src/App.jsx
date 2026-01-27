@@ -14,7 +14,9 @@ import UpdateListing from './pages/UpdateListing';
 import Listing from './pages/Listing';
 import Search from './pages/Search';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminLogs from './pages/AdminLogs'; // ✅ NEW
+import AdminLogs from './pages/AdminLogs'; 
+import Wishlist from "./pages/wishlist";
+
 
 export default function App() {
   return (
@@ -29,6 +31,8 @@ export default function App() {
         <Route path='/sign-up' element={<SignUp />} />
         <Route path='/about' element={<About />} />
         <Route path='/search' element={<Search />} />
+        <Route path="/wishlist" element={<Wishlist />} />
+
         <Route path='/listing/:listingId' element={<Listing />} />
 
         {/* User Protected Routes */}

@@ -13,7 +13,8 @@ const cookieOptions = {
 // =====================
 export const signup = async (req, res, next) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, accountType } = req.body;
+
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -26,6 +27,7 @@ export const signup = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
+      accountType,
       avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
       role: 'user', // default
     });
@@ -147,14 +149,16 @@ export const google = async (req, res, next) => {
       );
 
       const newUser = new User({
-        username: name.split(' ').join('').toLowerCase(),
-        email,
-        password: hashedPassword,
-        avatar:
-          photo ||
-          'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-        role: 'user',
-      });
+  username: name.split(' ').join('').toLowerCase(),
+  email,
+  password: hashedPassword,
+  avatar:
+    photo ||
+    'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+  role: 'user',
+  accountType: req.body.accountType || 'buyer', // ✅ ADD THIS
+});
+
 
       await newUser.save();
 

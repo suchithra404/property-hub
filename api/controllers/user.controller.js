@@ -40,6 +40,28 @@ export const updateUser = async (req, res, next) => {
     next(error);
   }
 };
+//getwishlist
+export const getWishlist = async (req, res, next) => {
+  try {
+
+    const user = await User
+      .findById(req.user.id)
+      .populate("wishlist");
+
+    if (!user) {
+      return res.status(404).json([]);
+    }
+
+    // ✅ Always send array
+    res.status(200).json(user.wishlist || []);
+
+  } catch (err) {
+
+    console.log("Wishlist Error:", err);
+
+    res.status(500).json([]);
+  }
+};
 
 // ================= DELETE USER (ADMIN + SELF) =================
 export const deleteUser = async (req, res, next) => {
@@ -89,4 +111,5 @@ export const getUser = async (req, res, next) => {
   } catch (error) {
     next(error);
   }
+  
 };
