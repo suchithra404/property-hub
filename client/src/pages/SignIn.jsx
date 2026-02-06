@@ -10,9 +10,14 @@ import {
 
 import OAuth from '../components/OAuth';
 
+
 export default function SignIn() {
+
+  // ================= STATES =================
+
   const [formData, setFormData] = useState({
     email: '',
+    phone: '',
     password: '',
   });
 
@@ -21,6 +26,9 @@ export default function SignIn() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+
+  // ================= HANDLE CHANGE =================
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -28,21 +36,30 @@ export default function SignIn() {
     });
   };
 
+
+  // ================= LOGIN =================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      dispatch(signInFailure('Please fill all fields'));
+    // At least email or phone
+    if (
+      (!formData.email && !formData.phone) ||
+      !formData.password
+    ) {
+      dispatch(
+        signInFailure('Please enter Email or Mobile and Password')
+      );
       return;
     }
 
     try {
+
       dispatch(signInStart());
 
       const res = await fetch('/api/auth/signin', {
         method: 'POST',
 
-        // 🔥 VERY IMPORTANT
         credentials: 'include',
 
         headers: {
@@ -55,16 +72,16 @@ export default function SignIn() {
       const data = await res.json();
 
       if (!res.ok || data.success === false) {
-        dispatch(signInFailure(data.message || 'Invalid credentials'));
+        dispatch(
+          signInFailure(data.message || 'Invalid credentials')
+        );
         return;
       }
 
-      // 🔥 Save full user (including role)
       dispatch(signInSuccess(data));
 
       alert('Signed in successfully 🎉');
 
-      // If admin → go to dashboard
       if (data.role === 'admin') {
         navigate('/admin');
       } else {
@@ -72,9 +89,14 @@ export default function SignIn() {
       }
 
     } catch (err) {
-      dispatch(signInFailure(err.message || 'Something went wrong'));
+      dispatch(
+        signInFailure(err.message || 'Something went wrong')
+      );
     }
   };
+
+
+  // ================= UI =================
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
@@ -85,14 +107,29 @@ export default function SignIn() {
 
       <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
 
+        {/* Email */}
+
         <input
           type='email'
-          placeholder='Email'
+          placeholder='Email (Optional)'
           className='border p-3 rounded-lg'
           id='email'
           value={formData.email}
           onChange={handleChange}
         />
+
+        {/* Mobile */}
+
+        <input
+          type='text'
+          placeholder='Mobile Number (Optional)'
+          className='border p-3 rounded-lg'
+          id='phone'
+          value={formData.phone}
+          onChange={handleChange}
+        />
+
+        {/* Password */}
 
         <input
           type='password'
@@ -103,6 +140,8 @@ export default function SignIn() {
           onChange={handleChange}
         />
 
+        {/* Login Button */}
+
         <button
           type='submit'
           disabled={loading}
@@ -111,9 +150,14 @@ export default function SignIn() {
           {loading ? 'Loading...' : 'Sign In'}
         </button>
 
+        {/* Google Login */}
+
         <OAuth />
 
       </form>
+
+
+      {/* Signup Link */}
 
       <div className='flex gap-2 mt-5'>
         <p>Dont have an account?</p>
@@ -122,6 +166,9 @@ export default function SignIn() {
           <span className='text-blue-700'>Sign up</span>
         </Link>
       </div>
+
+
+      {/* Error */}
 
       {error && (
         <p className='text-red-500 mt-5'>{error}</p>

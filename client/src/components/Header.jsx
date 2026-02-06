@@ -171,6 +171,17 @@ useEffect(() => {
                 </Link>
               </li>
 
+              {currentUser && (
+  <Link
+    to="/visits"
+    className="hover:underline text-blue-600 font-semibold"
+  >
+    📅 My Visits
+  </Link>
+)}
+
+
+
               {/* Admin Dashboard */}
               {(currentUser.role === "admin" ||
                 currentUser.role === "superadmin") && (

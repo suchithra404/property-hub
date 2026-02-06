@@ -15,6 +15,13 @@ router.post('/signup', signup);
 // Sign In
 router.post('/signin', signin);
 
+// SIGN OUT
+router.get('/signout', (req, res) => {
+  res.clearCookie('access_token');
+  res.status(200).json('Signout success');
+});
+
+
 // Google Auth
 router.post('/google', google);
 

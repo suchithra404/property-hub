@@ -5,15 +5,22 @@ import OAuth from '../components/OAuth';
 export default function SignUp() {
 
   const [formData, setFormData] = useState({
-    accountType: 'buyer', // ✅ default
-  });
+  username: '',
+  email: '',
+  phone: '',
+  password: '',
+  accountType: 'buyer',
+});
+
 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  // Handle Input Change
+
+  // ================= HANDLE CHANGE =================
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -21,20 +28,34 @@ export default function SignUp() {
     });
   };
 
-  // Handle Submit
+
+  // ================= HANDLE SUBMIT =================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Sending:", formData);
+
+    // At least email or phone
+    if (!formData.email && !formData.phone) {
+      setError('Please enter Email or Mobile Number');
+      return;
+    }
 
     try {
       setLoading(true);
 
       const res = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
+  method: 'POST',
+
+  credentials: 'include',   // ✅ VERY IMPORTANT
+
+  headers: {
+    'Content-Type': 'application/json',
+  },
+
+  body: JSON.stringify(formData),
+});
+
 
       const data = await res.json();
 
@@ -55,6 +76,9 @@ export default function SignUp() {
     }
   };
 
+
+  // ================= UI =================
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
 
@@ -74,14 +98,22 @@ export default function SignUp() {
           required
         />
 
-        {/* Email */}
+        {/* Email (Optional) */}
         <input
           type='email'
-          placeholder='Email'
+          placeholder='Email (Optional)'
           className='border p-3 rounded-lg'
           id='email'
           onChange={handleChange}
-          required
+        />
+
+        {/* Phone (Optional) */}
+        <input
+          type='text'
+          placeholder='Mobile Number (Optional)'
+          className='border p-3 rounded-lg'
+          id='phone'
+          onChange={handleChange}
         />
 
         {/* Password */}
@@ -94,12 +126,12 @@ export default function SignUp() {
           required
         />
 
-        {/* ✅ User Type Selection */}
+        {/* Account Type */}
         <select
           id="accountType"
           className="border p-3 rounded-lg"
           onChange={handleChange}
-          value={formData.userType}
+          value={formData.accountType}
         >
           <option value="buyer">Buyer</option>
           <option value="seller">Seller</option>
@@ -117,6 +149,7 @@ export default function SignUp() {
         <OAuth />
       </form>
 
+
       {/* Login Link */}
       <div className='flex gap-2 mt-5'>
         <p>Have an account?</p>
@@ -125,6 +158,7 @@ export default function SignUp() {
           <span className='text-blue-700'>Sign in</span>
         </Link>
       </div>
+
 
       {/* Error */}
       {error && <p className='text-red-500 mt-5'>{error}</p>}

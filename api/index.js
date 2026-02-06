@@ -14,6 +14,7 @@ import authRouter from "./routes/auth.route.js";
 import listingRouter from "./routes/listing.route.js";
 import adminRouter from "./routes/admin.route.js"; 
 import wishlistRoute from "./routes/wishlist.route.js";
+import visitRequestRoute from "./routes/visitRequest.route.js";
 
 
 const app = express();
@@ -49,6 +50,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/listing", listingRouter);
 app.use("/api/admin", adminRouter); 
 app.use("/api/wishlist", wishlistRoute);
+app.use("/api/visit", visitRequestRoute);
 
 
 /* ========== FRONTEND ========== */

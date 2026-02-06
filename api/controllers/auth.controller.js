@@ -9,32 +9,56 @@ const cookieOptions = {
 };
 
 // =====================
-// SIGN UP
+// SIGN UP (Email OR Phone)
 // =====================
 export const signup = async (req, res, next) => {
+  console.log("SIGNUP BODY:", req.body);
+
   try {
-    const { username, email, password, accountType } = req.body;
 
+    const {
+      username,
+      email,
+      phone,
+      password,
+      accountType
+    } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+    // Must have email or phone
+    if (!email && !phone) {
+      return res
+        .status(400)
+        .json({ message: 'Email or phone is required' });
     }
 
-    const hashedPassword = bcryptjs.hashSync(password, 10);
+    // Check existing user
+    const existingUser = await User.findOne({
+      $or: [{ email }, { phone }]
+    });
+
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ message: 'User already exists' });
+    }
+
+    const hashedPassword =
+      bcryptjs.hashSync(password, 10);
 
     const newUser = new User({
       username,
       email,
+      phone,
       password: hashedPassword,
       accountType,
-      avatar: 'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-      role: 'user', // default
+      avatar:
+        'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+      role: 'user',
     });
 
     await newUser.save();
 
-    // Token with role
+    // Token
     const token = jwt.sign(
       {
         id: newUser._id,
@@ -43,15 +67,15 @@ export const signup = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    // Hide password
-    const { password: pass, ...rest } = newUser._doc;
+    const { password: pass, ...rest } =
+      newUser._doc;
 
     res
       .cookie('access_token', token, cookieOptions)
       .status(201)
       .json({
         ...rest,
-        role: newUser.role, // ✅ SEND ROLE
+        role: newUser.role,
       });
 
   } catch (err) {
@@ -59,29 +83,50 @@ export const signup = async (req, res, next) => {
   }
 };
 
+
 // =====================
-// SIGN IN
+// SIGN IN (Email OR Phone)
 // =====================
 export const signin = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    const {
+      email,
+      phone,
+      password
+    } = req.body;
+
+    // Must have email or phone
+    if (!email && !phone) {
+      return res
+        .status(400)
+        .json({ message: 'Email or phone is required' });
+    }
+
+    // Find by email or phone
+    const user = await User.findOne({
+      $or: [{ email }, { phone }]
+    });
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res
+        .status(404)
+        .json({ message: 'User not found' });
     }
 
-    const isPasswordValid = bcryptjs.compareSync(
-      password,
-      user.password
-    );
+    const isPasswordValid =
+      bcryptjs.compareSync(
+        password,
+        user.password
+      );
 
     if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res
+        .status(401)
+        .json({ message: 'Invalid credentials' });
     }
 
-    // Token with role
+    // Token
     const token = jwt.sign(
       {
         id: user._id,
@@ -90,14 +135,15 @@ export const signin = async (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    const { password: pass, ...rest } = user._doc;
+    const { password: pass, ...rest } =
+      user._doc;
 
     res
       .cookie('access_token', token, cookieOptions)
       .status(200)
       .json({
         ...rest,
-        role: user.role, // ✅ SEND ROLE
+        role: user.role,
       });
 
   } catch (err) {
@@ -105,11 +151,13 @@ export const signin = async (req, res, next) => {
   }
 };
 
+
 // =====================
-// GOOGLE AUTH
+// GOOGLE AUTH (Same)
 // =====================
 export const google = async (req, res, next) => {
   try {
+
     const { email, name, photo } = req.body;
 
     let user = await User.findOne({ email });
@@ -125,17 +173,18 @@ export const google = async (req, res, next) => {
         process.env.JWT_SECRET
       );
 
-      const { password: pass, ...rest } = user._doc;
+      const { password: pass, ...rest } =
+        user._doc;
 
       res
         .cookie('access_token', token, cookieOptions)
         .status(200)
         .json({
           ...rest,
-          role: user.role, // ✅ SEND ROLE
+          role: user.role,
         });
 
-    } 
+    }
     // NEW USER
     else {
 
@@ -143,22 +192,31 @@ export const google = async (req, res, next) => {
         Math.random().toString(36).slice(-8) +
         Math.random().toString(36).slice(-8);
 
-      const hashedPassword = bcryptjs.hashSync(
-        generatedPassword,
-        10
-      );
+      const hashedPassword =
+        bcryptjs.hashSync(
+          generatedPassword,
+          10
+        );
 
       const newUser = new User({
-  username: name.split(' ').join('').toLowerCase(),
-  email,
-  password: hashedPassword,
-  avatar:
-    photo ||
-    'https://cdn-icons-png.flaticon.com/512/149/149071.png',
-  role: 'user',
-  accountType: req.body.accountType || 'buyer', // ✅ ADD THIS
-});
+        username: name
+          .split(' ')
+          .join('')
+          .toLowerCase(),
 
+        email,
+
+        password: hashedPassword,
+
+        avatar:
+          photo ||
+          'https://cdn-icons-png.flaticon.com/512/149/149071.png',
+
+        role: 'user',
+
+        accountType:
+          req.body.accountType || 'buyer',
+      });
 
       await newUser.save();
 
@@ -170,14 +228,15 @@ export const google = async (req, res, next) => {
         process.env.JWT_SECRET
       );
 
-      const { password: pass, ...rest } = newUser._doc;
+      const { password: pass, ...rest } =
+        newUser._doc;
 
       res
         .cookie('access_token', token, cookieOptions)
         .status(201)
         .json({
           ...rest,
-          role: newUser.role, // ✅ SEND ROLE
+          role: newUser.role,
         });
     }
 
@@ -186,11 +245,13 @@ export const google = async (req, res, next) => {
   }
 };
 
+
 // =====================
 // SIGN OUT
 // =====================
 export const signOut = async (req, res, next) => {
   try {
+
     res.clearCookie('access_token');
 
     res.status(200).json({

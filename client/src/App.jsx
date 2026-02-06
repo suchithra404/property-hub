@@ -16,6 +16,10 @@ import Search from './pages/Search';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogs from './pages/AdminLogs'; 
 import Wishlist from "./pages/wishlist";
+import MyListings from './pages/MyListings';
+import VisitRequests from "./pages/VisitRequests";
+
+
 
 
 export default function App() {
@@ -32,8 +36,11 @@ export default function App() {
         <Route path='/about' element={<About />} />
         <Route path='/search' element={<Search />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/my-listings" element={<MyListings />} />
 
         <Route path='/listing/:listingId' element={<Listing />} />
+        <Route path="/visits" element={<VisitRequests />} />
+
 
         {/* User Protected Routes */}
         <Route element={<PrivateRoute />}>
