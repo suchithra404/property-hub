@@ -1,12 +1,31 @@
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 
 export default function AdminLogs() {
+
+  // Get logged-in user
+  const { currentUser } = useSelector((state) => state.user);
 
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch logs
+
+  // ================= ACCESS CONTROL =================
+  if (
+    !currentUser ||
+    (currentUser.role !== "admin" &&
+      currentUser.role !== "superadmin")
+  ) {
+    return (
+      <div className="text-center mt-20 text-red-600 font-semibold">
+        Only admins can view logs 🔒
+      </div>
+    );
+  }
+
+
+  // ================= FETCH LOGS =================
   useEffect(() => {
 
     const fetchLogs = async () => {
@@ -31,11 +50,14 @@ export default function AdminLogs() {
       }
     };
 
-    fetchLogs();
+    if (currentUser) {
+      fetchLogs();
+    }
 
-  }, []);
+  }, [currentUser]);
 
 
+  // ================= UI =================
   return (
     <div className="p-10">
 
@@ -91,9 +113,8 @@ export default function AdminLogs() {
                   </td>
 
                   <td className="p-2 border">
-  {log.actionOn?.username || log.actionOnName || 'N/A'}
-</td>
-
+                    {log.actionOn?.username || log.actionOnName || "N/A"}
+                  </td>
 
                   <td className="p-2 border text-sm">
                     {log.message}

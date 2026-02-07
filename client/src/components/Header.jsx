@@ -22,51 +22,43 @@ export default function Header() {
   // Get user from redux
   const { currentUser } = useSelector((state) => state.user);
 
-  
-// Fetch Wishlist Count
+  // =====================
+  // Fetch Wishlist Count
+  // =====================
+  useEffect(() => {
+    if (!currentUser) return;
 
-// =====================
-// Fetch Wishlist Count
-// =====================
-useEffect(() => {
-  if (!currentUser) return;
+    const fetchWishlist = async () => {
+      try {
+        const res = await fetch("/api/wishlist", {
+          credentials: "include",
+        });
 
-  const fetchWishlist = async () => {
-    try {
-      const res = await fetch("/api/wishlist", {
-        credentials: "include",
-      });
+        if (!res.ok) throw new Error();
 
-      if (!res.ok) throw new Error();
+        const data = await res.json();
 
-      const data = await res.json();
+        if (Array.isArray(data)) {
+          setWishlistCount(data.length);
+        } else {
+          setWishlistCount(0);
+        }
 
-      if (Array.isArray(data)) {
-        setWishlistCount(data.length);
-      } else {
+      } catch (error) {
+        console.log("Fetch Wishlist Error:", error);
         setWishlistCount(0);
       }
+    };
 
-    } catch (error) {
-      console.log("Fetch Wishlist Error:", error);
-      setWishlistCount(0);
-    }
-  };
+    fetchWishlist();
 
-  // First load
-  fetchWishlist();
+    window.addEventListener("wishlistUpdated", fetchWishlist);
 
-  // ✅ Listen for wishlist updates
-  window.addEventListener("wishlistUpdated", fetchWishlist);
+    return () => {
+      window.removeEventListener("wishlistUpdated", fetchWishlist);
+    };
 
-  return () => {
-    window.removeEventListener("wishlistUpdated", fetchWishlist);
-  };
-
-}, [currentUser]);
-
-
-
+  }, [currentUser]);
 
   // =====================
   // Logout Function
@@ -112,107 +104,117 @@ useEffect(() => {
   };
 
   return (
-    <header className="bg-slate-200 shadow-md">
-      <div className="flex justify-between items-center max-w-6xl mx-auto p-3">
+    <header className="bg-slate-200 shadow-md border-b border-slate-300">
 
-        {/* Logo */}
-        <Link to="/">
-          <h1 className="text-4xl font-bold">
-            <span className="text-slate-500">Property</span>{" "}
-            <span className="text-slate-600">Hub</span>
-          </h1>
-        </Link>
-
-        {/* Search Box */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSearch();
-          }}
-          className="bg-slate-100 p-3 rounded-lg flex items-center gap-2"
-        >
-          <input
-            type="text"
-            placeholder="Search..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="bg-transparent focus:outline-none w-24 sm:w-64"
-          />
-
-          <FaSearch
-            className="text-slate-600 cursor-pointer"
-            onClick={handleSearch}
-          />
-        </form>
-
-        {/* Nav Links */}
-        <ul className="flex gap-4 items-center">
-
-          <li className="hidden sm:inline text-slate-700 hover:underline">
-            <Link to="/">Home</Link>
-          </li>
-
-          <li className="hidden sm:inline text-slate-700 hover:underline">
-            <Link to="/about">About</Link>
-          </li>
-
-          {/* If User Logged In */}
-          {currentUser ? (
-            <>
-              {/* Profile */}
-              <li className="text-slate-700 hover:underline">
-                <Link to="/profile">Profile</Link>
-              </li>
-
-              {/* ❤️ Wishlist */}
-              <li className="text-red-500 font-semibold hover:underline">
-                <Link to="/wishlist">
-                  ❤️🏠 Wishlist ({wishlistCount})
-                </Link>
-              </li>
-
-              {currentUser && (
-  <Link
-    to="/visits"
-    className="hover:underline text-blue-600 font-semibold"
-  >
-    📅 My Visits
-  </Link>
-)}
+      <div className="max-w-7xl mx-auto px-6 py-5">
 
 
+        {/* Main Header Row */}
+        <div className="flex items-center justify-between">
 
-              {/* Admin Dashboard */}
-              {(currentUser.role === "admin" ||
-                currentUser.role === "superadmin") && (
-                <li className="text-blue-600 font-semibold hover:underline">
-                  <Link to="/admin/dashboard">Admin</Link>
-                </li>
-              )}
+          {/* ================= LEFT : LOGO ================= */}
+          <Link to="/" className="flex-shrink-0">
+            <h1 className="text-2xl font-bold">
+              <span className="text-slate-500">Property</span>{" "}
+              <span className="text-slate-700">Hub</span>
+            </h1>
+          </Link>
 
-              {/* Admin Logs */}
-              {(currentUser.role === "admin" ||
-                currentUser.role === "superadmin") && (
-                <li className="text-purple-600 font-semibold hover:underline">
-                  <Link to="/admin/logs">Logs</Link>
-                </li>
-              )}
 
-              {/* Logout */}
-              <li
-                onClick={handleLogout}
-                className="text-red-600 font-semibold cursor-pointer hover:underline"
-              >
-                Logout
-              </li>
-            </>
-          ) : (
-            <li className="text-slate-700 hover:underline">
-              <Link to="/sign-in">Sign in</Link>
+          {/* ================= CENTER : SEARCH ================= */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSearch();
+            }}
+            className="hidden md:flex items-center bg-white px-4 py-2 rounded-full shadow-sm w-[350px]"
+          >
+            <input
+              type="text"
+              placeholder="Search properties..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 bg-transparent outline-none text-sm"
+            />
+
+            <FaSearch
+              className="text-slate-600 cursor-pointer"
+              onClick={handleSearch}
+            />
+          </form>
+
+
+          {/* ================= RIGHT : NAV ================= */}
+          <ul className="flex items-center gap-5 text-sm font-medium">
+
+            <li className="hidden sm:block hover:underline">
+              <Link to="/">Home</Link>
             </li>
-          )}
 
-        </ul>
+            <li className="hidden sm:block hover:underline">
+              <Link to="/about">About</Link>
+            </li>
+
+            {/* If Logged In */}
+            {currentUser ? (
+              <>
+
+                <li className="hover:underline">
+                  <Link to="/profile">Profile</Link>
+                </li>
+
+                <li className="text-red-500 font-semibold hover:underline">
+                  <Link to="/wishlist">
+                    ❤️ Wishlist ({wishlistCount})
+                  </Link>
+                </li>
+
+                <li className="text-blue-600 font-semibold hover:underline">
+                  <Link to="/visits">
+                    📅 My Visits
+                  </Link>
+                </li>
+
+                {/* Admin */}
+                {(currentUser.role === "admin" ||
+                  currentUser.role === "superadmin") && (
+                  <li className="text-indigo-600 font-semibold hover:underline">
+                    <Link to="/admin/dashboard">Admin</Link>
+                  </li>
+                )}
+
+                {/* Logs */}
+                {(currentUser.role === "admin" ||
+                  currentUser.role === "superadmin") && (
+                  <li className="text-purple-600 font-semibold hover:underline">
+                    <Link to="/admin/logs">Logs</Link>
+                  </li>
+                )}
+
+                <li className="text-green-600 font-semibold hover:underline">
+  <Link to="/admin/messages">Inbox</Link>
+</li>
+
+
+                {/* Logout */}
+                <li
+                  onClick={handleLogout}
+                  className="text-red-600 font-semibold cursor-pointer hover:underline"
+                >
+                  Logout
+                </li>
+
+              </>
+            ) : (
+              <li className="hover:underline">
+                <Link to="/sign-in">Sign in</Link>
+              </li>
+            )}
+
+          </ul>
+
+        </div>
+
       </div>
     </header>
   );

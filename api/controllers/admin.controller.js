@@ -148,17 +148,10 @@ export const changeUserRole = async (req, res, next) => {
 
 
 // =======================
-// ✅ Get Admin Logs (Superadmin only)
+// ✅ Get Admin Logs (Admin + Superadmin)
 // =======================
 export const getAdminLogs = async (req, res, next) => {
   try {
-
-    // 🔐 Only superadmin
-    if (req.user.role !== 'superadmin') {
-      return next(
-        errorHandler(403, 'Only superadmin can view logs')
-      );
-    }
 
     const logs = await AdminLog.find()
       .populate('actionBy', 'username email role')
@@ -171,3 +164,4 @@ export const getAdminLogs = async (req, res, next) => {
     next(error);
   }
 };
+

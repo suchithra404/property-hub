@@ -18,6 +18,7 @@ import AdminLogs from './pages/AdminLogs';
 import Wishlist from "./pages/wishlist";
 import MyListings from './pages/MyListings';
 import VisitRequests from "./pages/VisitRequests";
+import AdminMessages from "./pages/AdminMessages";
 
 
 
@@ -40,7 +41,7 @@ export default function App() {
 
         <Route path='/listing/:listingId' element={<Listing />} />
         <Route path="/visits" element={<VisitRequests />} />
-
+        <Route path="/admin/messages" element={<AdminMessages />} />
 
         {/* User Protected Routes */}
         <Route element={<PrivateRoute />}>

@@ -128,12 +128,17 @@ export const signin = async (req, res, next) => {
 
     // Token
     const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET
-    );
+  {
+    id: user._id,
+    role: user.role,
+    isAdmin: user.isAdmin, // ⭐ ADD THIS
+    email: user.email,
+    username: user.username,
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "7d" }
+);
+
 
     const { password: pass, ...rest } =
       user._doc;

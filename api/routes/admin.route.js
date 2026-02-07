@@ -8,7 +8,7 @@ import {
   getAdminLogs, // ✅ ADD
 } from '../controllers/admin.controller.js';
 
-import { verifyToken } from '../utils/verifyUser.js';
+import { verifyToken, verifyAdmin } from "../utils/verifyUser.js";
 
 const router = express.Router();
 
@@ -26,6 +26,7 @@ router.delete('/delete/:id', verifyToken, deleteUserByAdmin);
 router.put('/role/:id', verifyToken, changeUserRole);
 
 // ✅ Superadmin: get logs
-router.get('/logs', verifyToken, getAdminLogs);
+router.get("/logs", verifyToken, verifyAdmin, getAdminLogs);
+
 
 export default router;
