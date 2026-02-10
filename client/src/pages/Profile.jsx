@@ -13,7 +13,8 @@ import {
   signOutUserFailure,
 } from '../redux/user/userSlice';
 
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
 
 export default function Profile() {
 
@@ -22,6 +23,7 @@ export default function Profile() {
   const { currentUser, loading } = useSelector((state) => state.user);
 
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({});
   const [userListings, setUserListings] = useState([]);
@@ -85,93 +87,148 @@ export default function Profile() {
     });
   };
 
-
   // ================= UPDATE USER =================
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    try {
+  try {
 
-      dispatch(updateUserStart());
+    dispatch(updateUserStart());
 
-      const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(formData),
-      });
+    const res = await fetch(`/api/user/update/${currentUser._id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      body: JSON.stringify(formData),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        dispatch(updateUserFailure(data.message));
-        return;
-      }
-
-      dispatch(updateUserSuccess(data));
-
-      alert("Profile Updated ✅");
-
-    } catch (error) {
-      dispatch(updateUserFailure(error.message));
+    if (!res.ok) {
+      dispatch(updateUserFailure(data.message));
+      alert("❌ " + data.message);
+      return;
     }
-  };
+
+    dispatch(updateUserSuccess(data));
+
+    // ✅ Check if password was changed
+    if (formData.password && formData.password.trim() !== "") {
+      alert("✅ Your new password has been updated successfully!");
+    } else {
+      alert("✅ Profile updated successfully!");
+    }
+
+    // ✅ Clear password after update
+    setFormData((prev) => ({
+      ...prev,
+      password: "",
+    }));
+
+  } catch (error) {
+
+    dispatch(updateUserFailure(error.message));
+    alert("❌ Server error. Try again later.");
+
+  }
+};
+
 
 
   // ================= DELETE USER =================
 
   const handleDeleteUser = async () => {
-    try {
 
-      dispatch(deleteUserStart());
+  // 1️⃣ Ask before deleting
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete your account? This cannot be undone!"
+  );
 
-      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
+  if (!confirmDelete) return; // Stop if user clicks Cancel
 
-      const data = await res.json();
+  try {
 
-      if (!res.ok) {
-        dispatch(deleteUserFailure(data.message));
-        return;
-      }
+    dispatch(deleteUserStart());
 
-      dispatch(deleteUserSuccess());
+    const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    });
 
-    } catch (error) {
-      dispatch(deleteUserFailure(error.message));
+    const data = await res.json();
+
+    if (!res.ok) {
+      dispatch(deleteUserFailure(data.message));
+      alert("❌ " + data.message);
+      return;
     }
-  };
+
+    // 2️⃣ Success message
+    alert("✅ Your account has been deleted successfully!");
+
+    // 3️⃣ Redux success
+    dispatch(deleteUserSuccess());
+
+    // 4️⃣ Redirect to login page
+    navigate('/sign-in');
+
+  } catch (error) {
+
+    dispatch(deleteUserFailure(error.message));
+    alert("❌ Server error. Try again later.");
+
+  }
+};
+
 
 
   // ================= SIGN OUT =================
 
-  const handleSignOut = async () => {
-    try {
+  // ================= SIGN OUT =================
 
-      dispatch(signOutUserStart());
+const handleSignOut = async () => {
 
-      const res = await fetch('/api/auth/signout', {
-        credentials: 'include',
-      });
+  // 1️⃣ Ask before logout
+  const confirmLogout = window.confirm("Do you really want to sign out?");
 
-      const data = await res.json();
+  if (!confirmLogout) return; // Stop if Cancel
 
-      if (!res.ok) {
-        dispatch(signOutUserFailure(data.message));
-        return;
-      }
+  try {
 
-      dispatch(signOutUserSuccess());
+    dispatch(signOutUserStart());
 
-    } catch (error) {
-      dispatch(signOutUserFailure(error.message));
+    const res = await fetch('/api/auth/signout', {
+      credentials: 'include',
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      dispatch(signOutUserFailure(data.message));
+      alert("❌ " + data.message);
+      return;
     }
-  };
+
+    // 2️⃣ Success message
+    alert("✅ Signed out successfully!");
+
+    // 3️⃣ Redux update
+    dispatch(signOutUserSuccess());
+
+    // 4️⃣ Redirect to login
+    navigate('/sign-in');
+
+  } catch (error) {
+
+    dispatch(signOutUserFailure(error.message));
+    alert("❌ Server error. Try again later.");
+
+  }
+};
+
 
 
   // ================= SHOW LISTINGS =================

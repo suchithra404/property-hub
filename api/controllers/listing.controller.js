@@ -1,20 +1,53 @@
 import Listing from '../models/listing.model.js';
 import { errorHandler } from '../utils/error.js';
+import Alert from "../models/alert.model.js";
+import User from "../models/user.model.js";
+
 
 /* ================= CREATE ================= */
 
 export const createListing = async (req, res, next) => {
   try {
+    // 1️⃣ Create listing
     const listing = await Listing.create({
       ...req.body,
-      userRef: req.user._id, // ✅ FIXED
+      userRef: req.user._id,
     });
 
+    // =======================
+    // 🔔 NEW LISTING ALERT (CITY BASED)
+    // =======================
+
+    // Safety check: city must exist
+    if (listing.city) {
+
+      // Find users (excluding creator)
+      const users = await User.find({
+        _id: { $ne: req.user._id },
+      }).select("_id");
+
+      // Create alerts
+      const alerts = users.map((user) => ({
+        userId: user._id,
+        title: "New Property Added",
+        message: `A new property has been added in ${listing.city}.`,
+        type: "listing",
+      }));
+
+      // Save alerts
+      if (alerts.length > 0) {
+        await Alert.insertMany(alerts);
+      }
+    }
+
+    // 2️⃣ Send response
     return res.status(201).json(listing);
+
   } catch (error) {
     next(error);
   }
 };
+
 
 /* ================= DELETE ================= */
 

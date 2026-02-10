@@ -1,5 +1,7 @@
 import VisitRequest from "../models/visitRequest.model.js";
 import Listing from "../models/listing.model.js";
+import Alert from "../models/alert.model.js";
+
 
 // ================================
 // 1. Create Visit Request (User)
@@ -95,6 +97,16 @@ export const updateVisitStatus = async (req, res) => {
     )
       .populate("userId", "username email")
       .populate("listingId", "name userRef");
+
+    // =======================
+    // CREATE ALERT FOR BUYER
+    // =======================
+    await Alert.create({
+      userId: updatedRequest.userId._id, // buyer
+      title: "Visit Request Update",
+      message: `Your visit request for "${updatedRequest.listingId.name}" has been ${updatedRequest.status}.`,
+      type: "visit",
+    });
 
     res.status(200).json({
       success: true,

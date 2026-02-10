@@ -1,6 +1,36 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import L from "leaflet";
+
+delete L.Icon.Default.prototype._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  iconUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  shadowUrl:
+    "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+});
+
+function LocationPicker({ setFormData }) {
+  useMapEvents({
+    click(e) {
+      setFormData((prev) => ({
+        ...prev,
+        location: {
+          lat: Number(e.latlng.lat),
+          lng: Number(e.latlng.lng),
+        },
+      }));
+    },
+  });
+  return null;
+}
+
+
 
 export default function CreateListing() {
   const { currentUser } = useSelector((state) => state.user);
@@ -54,6 +84,16 @@ export default function CreateListing() {
     immediate: true,
 
     videoTourLink: "",
+
+    // ======================
+// LOCATION (FOR MAP VIEW)
+// ======================
+location: {
+  lat: null,
+  lng: null,
+},
+
+
   });
 
   /* ================= IMAGE UPLOAD ================= */
@@ -210,6 +250,38 @@ export default function CreateListing() {
         <input id="name" placeholder="Name" required className="border p-3 rounded" onChange={handleChange} />
         <textarea id="description" placeholder="Description" required className="border p-3 rounded" onChange={handleChange} />
         <input id="address" placeholder="Address" required className="border p-3 rounded" onChange={handleChange} />
+
+{/* ================= MAP LOCATION PICKER ================= */}
+<div className="mt-6">
+  <p className="font-semibold mb-2">📍 Select Property Location</p>
+
+  <MapContainer
+    center={[12.9716, 77.5946]} // default center (can be anywhere)
+    zoom={10}
+    style={{ height: "300px", width: "100%" }}
+    className="rounded-lg border"
+  >
+    <TileLayer
+      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      attribution="&copy; OpenStreetMap contributors"
+    />
+
+    <LocationPicker setFormData={setFormData} />
+
+    {formData.location.lat && formData.location.lng && (
+      <Marker position={[formData.location.lat, formData.location.lng]} />
+    )}
+  </MapContainer>
+
+  {typeof formData.location.lat === "number" &&
+  typeof formData.location.lng === "number" && (
+    <p className="text-sm text-gray-600 mt-2">
+      Selected location: {formData.location.lat.toFixed(4)},{" "}
+      {formData.location.lng.toFixed(4)}
+    </p>
+)}
+
+</div>
 
         {/* LOCATION */}
         <input id="city" placeholder="City" className="border p-3 rounded" onChange={handleChange} />

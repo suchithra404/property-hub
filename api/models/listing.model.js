@@ -200,6 +200,21 @@ const listingSchema = new mongoose.Schema(
       default: "",
     },
 
+    // ======================
+// LOCATION (FOR MAP VIEW)
+// ======================
+location: {
+  lat: {
+    type: Number,
+    default: null,
+  },
+  lng: {
+    type: Number,
+    default: null,
+  },
+},
+
+
   },
   { timestamps: true }
 );

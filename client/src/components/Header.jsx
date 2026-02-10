@@ -19,6 +19,14 @@ export default function Header() {
   // ❤️ Wishlist Count
   const [wishlistCount, setWishlistCount] = useState(0);
 
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  
+  // 🔔 Alerts Count
+const [alertCount, setAlertCount] = useState(0);
+
+
+
+
   // Get user from redux
   const { currentUser } = useSelector((state) => state.user);
 
@@ -59,6 +67,35 @@ export default function Header() {
     };
 
   }, [currentUser]);
+
+  // =====================
+// Fetch Alerts Count
+// =====================
+useEffect(() => {
+  if (!currentUser) return;
+
+  const fetchAlerts = async () => {
+    try {
+      const res = await fetch("/api/alerts", {
+        credentials: "include",
+      });
+
+      if (!res.ok) return;
+
+      const data = await res.json();
+
+      const unread = data.filter((a) => !a.isRead).length;
+      setAlertCount(unread);
+
+    } catch (error) {
+      console.log("Fetch Alerts Error:", error);
+      setAlertCount(0);
+    }
+  };
+
+  fetchAlerts();
+}, [currentUser]);
+
 
   // =====================
   // Logout Function
@@ -169,6 +206,9 @@ export default function Header() {
                   </Link>
                 </li>
 
+                
+
+
                 <li className="text-blue-600 font-semibold hover:underline">
                   <Link to="/visits">
                     📅 My Visits
@@ -194,6 +234,52 @@ export default function Header() {
                 <li className="text-green-600 font-semibold hover:underline">
   <Link to="/admin/messages">Inbox</Link>
 </li>
+
+{/* ☰ More Menu */}
+<li className="relative">
+  <button
+    onClick={() => setShowMoreMenu(!showMoreMenu)}
+    className="font-semibold hover:underline"
+  >
+    ☰ More
+  </button>
+
+  {showMoreMenu && (
+    <div className="absolute right-0 mt-2 w-56 bg-white border rounded-lg shadow-lg z-50">
+
+  {/* Insights */}
+  <Link
+    to="/insights"
+    onClick={() => setShowMoreMenu(false)}
+    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+  >
+    <span className="text-lg">📊</span>
+    <span className="font-medium">Insights</span>
+  </Link>
+
+  {/* Alerts */}
+  <Link
+    to="/alerts"
+    onClick={() => setShowMoreMenu(false)}
+    className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100"
+  >
+    <span className="text-lg">🔔</span>
+    <span className="font-medium">Alerts</span>
+  </Link>
+
+  <Link
+  to="/map"
+  className="block px-4 py-2 hover:bg-gray-100"
+>
+  🗺️ Map View
+</Link>
+
+
+</div>
+
+  )}
+</li>
+
 
 
                 {/* Logout */}

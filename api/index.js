@@ -16,6 +16,10 @@ import adminRouter from "./routes/admin.route.js";
 import wishlistRoute from "./routes/wishlist.route.js";
 import visitRequestRoute from "./routes/visitRequest.route.js";
 import contactRoute from "./routes/contact.route.js";
+import insightsRouter from './routes/insights.route.js';
+import alertRouter from "./routes/alert.route.js";
+
+
 
 const app = express();
 const __dirname = path.resolve();
@@ -52,6 +56,10 @@ app.use("/api/admin", adminRouter);
 app.use("/api/wishlist", wishlistRoute);
 app.use("/api/visit", visitRequestRoute);
 app.use("/api/contact", contactRoute);
+app.use('/api/insights', insightsRouter);
+app.use("/api/alerts", alertRouter);
+
+
 
 /* ========== FRONTEND ========== */
 

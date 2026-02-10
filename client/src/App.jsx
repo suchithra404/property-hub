@@ -19,6 +19,9 @@ import Wishlist from "./pages/wishlist";
 import MyListings from './pages/MyListings';
 import VisitRequests from "./pages/VisitRequests";
 import AdminMessages from "./pages/AdminMessages";
+import Insights from "./pages/Insights";
+import Alerts from "./pages/Alerts";
+import MapView from "./pages/MapView";
 
 
 
@@ -42,6 +45,13 @@ export default function App() {
         <Route path='/listing/:listingId' element={<Listing />} />
         <Route path="/visits" element={<VisitRequests />} />
         <Route path="/admin/messages" element={<AdminMessages />} />
+        <Route path="/insights" element={<Insights />} />
+        <Route path="/alerts" element={<Alerts />} />
+        <Route path="/map" element={<MapView />} />
+
+
+
+
 
         {/* User Protected Routes */}
         <Route element={<PrivateRoute />}>
